@@ -1,0 +1,17 @@
+event_name: prototype_test_event
+
+description: Test event created from Tracking Hub.
+
+trigger: User taps test button.
+
+criticality: low
+
+status: draft
+
+documentation_status: complete
+
+platforms:
+  ios: true
+  android: true
+
+parameters: []
