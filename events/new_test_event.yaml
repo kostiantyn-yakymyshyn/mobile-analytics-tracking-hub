@@ -1,0 +1,13 @@
+event_name: new_test_event
+description: asdasd
+trigger: dsdasdsa
+criticality: medium
+status: draft
+documentation_status: complete
+platforms:
+  ios: true
+  android: false
+parameters: []
+screenshot:
+  path: assets/events/new_test_event/screenshot.png
+  alt: new_test_event screen
