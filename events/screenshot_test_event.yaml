@@ -1,0 +1,13 @@
+event_name: screenshot_test_event
+description: Testing screenshot upload
+trigger: User taps test button
+criticality: low
+status: draft
+documentation_status: complete
+platforms:
+  ios: true
+  android: true
+parameters: []
+screenshot:
+  path: assets/events/screenshot_test_event/screenshot.png
+  alt: screenshot_test_event screen
