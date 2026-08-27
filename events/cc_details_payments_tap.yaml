@@ -1,0 +1,13 @@
+event_name: cc_details_payments_tap
+description: dsc
+trigger: description
+criticality: medium
+status: draft
+documentation_status: complete
+platforms:
+  ios: true
+  android: true
+parameters: []
+screenshot:
+  path: assets/events/cc_details_payments_tap/screenshot.png
+  alt: cc_details_payments_tap screen
