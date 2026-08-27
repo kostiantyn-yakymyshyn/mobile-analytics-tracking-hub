@@ -1,0 +1,17 @@
+event_name: charity_auction_lot_details_bell_tap
+description: charity events
+trigger: Trigger event with the parameter "state", which should indicate the status that will be applied after the bell icon is tapped.
+criticality: medium
+status: draft
+documentation_status: complete
+platforms:
+  ios: true
+  android: true
+parameters:
+  - name: state
+    type: string
+    required: true
+    description: ''
+screenshot:
+  path: assets/events/charity_auction_lot_details_bell_tap/screenshot.png
+  alt: charity_auction_lot_details_bell_tap screen
