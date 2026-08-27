@@ -1,0 +1,13 @@
+event_name: adasdasdsa
+description: sadasd
+trigger: adsadas
+criticality: medium
+status: draft
+documentation_status: complete
+platforms:
+  ios: true
+  android: true
+parameters: []
+screenshot:
+  path: assets/events/adasdasdsa/screenshot.png
+  alt: adasdasdsa screen
