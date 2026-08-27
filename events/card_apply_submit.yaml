@@ -1,25 +1,17 @@
 event_name: card_apply_submit
-
 description: User submits card application.
-
 trigger: User taps the "Submit" button.
-
 criticality: critical
-
 status: active
-
 documentation_status: complete
-
 platforms:
   ios: false
   android: true
-
 parameters:
   - name: application_id
     type: string
     required: true
     description: Unique application identifier.
-
   - name: card_type
     type: enum
     required: true
@@ -27,7 +19,6 @@ parameters:
     allowed_values:
       - virtual
       - physical
-
   - name: result
     type: enum
     required: true
@@ -35,7 +26,6 @@ parameters:
     allowed_values:
       - success
       - failure
-
 screenshot:
   path: assets/events/card_apply_submit/screenshot.png
   alt: Card application submit screen.
