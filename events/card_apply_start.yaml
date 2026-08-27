@@ -2,7 +2,7 @@ event_name: card_apply_start
 description: User starts the card application flow.
 trigger: User enters the card application flow.
 criticality: high
-status: draft
+status: active
 documentation_status: complete
 platforms:
   ios: true
@@ -10,4 +10,4 @@ platforms:
 parameters: []
 screenshot:
   path: assets/events/card_apply_start/screenshot.png
-  alt: card_apply_start screen
+  alt: Card application start screen.
