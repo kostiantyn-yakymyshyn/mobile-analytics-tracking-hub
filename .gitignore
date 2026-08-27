@@ -3,3 +3,4 @@ dist/
 .env
 backend/.env
 .DS_Store
+.dev.vars
