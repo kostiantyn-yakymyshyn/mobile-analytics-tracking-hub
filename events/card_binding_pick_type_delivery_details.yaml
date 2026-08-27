@@ -1,0 +1,17 @@
+event_name: card_binding_pick_type_delivery_details
+description: adasdasd
+trigger: sadasdsadad
+criticality: medium
+status: draft
+documentation_status: complete
+platforms:
+  ios: true
+  android: true
+parameters:
+  - name: type
+    type: string
+    required: true
+    description: ''
+screenshot:
+  path: assets/events/card_binding_pick_type_delivery_details/screenshot.png
+  alt: card_binding_pick_type_delivery_details screen
