@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_URL } from "../config";
 import type {
   EventCriticality,
   EventParameter,
@@ -305,7 +306,7 @@ function EventForm({
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/events`,
+        `${API_URL}/events`,
         {
           method: "POST",
           headers: {

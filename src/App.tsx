@@ -5,9 +5,7 @@ import type { TrackingEvent } from "./types/event";
 import EventList from "./components/EventList";
 import EventDetails from "./components/EventDetails";
 import EventForm from "./components/EventForm";
-
-const API_URL =
-  "https://tracking-hub-api.tracking-hub-api.workers.dev";
+import { API_URL } from "./config";
 
 function App() {
   const [events, setEvents] = useState<TrackingEvent[]>([]);
