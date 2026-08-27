@@ -1,0 +1,13 @@
+event_name: cc_details_statement_tap
+description: фівфвіф
+trigger: sadasdasd
+criticality: medium
+status: draft
+documentation_status: complete
+platforms:
+  ios: true
+  android: true
+parameters: []
+screenshot:
+  path: assets/events/cc_details_statement_tap/screenshot.png
+  alt: cc_details_statement_tap screen
