@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   EventCriticality,
   EventParameter,
@@ -6,31 +6,90 @@ import type {
 } from "../types/event";
 import { eventToYaml } from "../services/yaml";
 
-function EventForm() {
-  const [eventName, setEventName] = useState("");
-  const [description, setDescription] = useState("");
-  const [trigger, setTrigger] = useState("");
+type EventFormProps = {
+  initialEvent?: TrackingEvent;
+  onCancel?: () => void;
+};
+
+function EventForm({
+  initialEvent,
+  onCancel,
+}: EventFormProps) {
+  console.log(
+    "EDIT SCREENSHOT PATH:",
+    initialEvent?.screenshot?.path
+  );
+  const [eventName, setEventName] = useState(
+    initialEvent?.event_name ?? ""
+  );
+
+  const [description, setDescription] = useState(
+    initialEvent?.description ?? ""
+  );
+
+  const [trigger, setTrigger] = useState(
+    initialEvent?.trigger ?? ""
+  );
 
   const [criticality, setCriticality] =
-    useState<EventCriticality>("medium");
+    useState<EventCriticality>(
+      initialEvent?.criticality ?? "medium"
+    );
 
   const [platforms, setPlatforms] = useState({
-    ios: true,
-    android: true,
+    ios: initialEvent?.platforms?.ios ?? true,
+    android: initialEvent?.platforms?.android ?? true,
   });
 
   const [parameters, setParameters] = useState<
     EventParameter[]
-  >([]);
+  >(
+    initialEvent?.parameters
+      ? [...initialEvent.parameters]
+      : []
+  );
 
   const [yamlPreview, setYamlPreview] =
     useState("");
   const [errors, setErrors] = useState<string[]>([]);
+
   const [screenshot, setScreenshot] =
     useState<File | null>(null);
 
+  const [existingScreenshotPath, setExistingScreenshotPath] =
+    useState<string | null>(
+      initialEvent?.screenshot?.path ?? null
+    );
   const [screenshotPreview, setScreenshotPreview] =
     useState<string | null>(null);
+
+  useEffect(() => {
+    setEventName(initialEvent?.event_name ?? "");
+    setDescription(initialEvent?.description ?? "");
+    setTrigger(initialEvent?.trigger ?? "");
+    setCriticality(initialEvent?.criticality ?? "medium");
+
+    setPlatforms({
+      ios: initialEvent?.platforms?.ios ?? true,
+      android: initialEvent?.platforms?.android ?? true,
+    });
+
+    setParameters(
+      initialEvent?.parameters
+        ? [...initialEvent.parameters]
+        : []
+    );
+
+    setExistingScreenshotPath(
+      initialEvent?.screenshot?.path ?? null
+    );
+
+    setScreenshot(null);
+    setScreenshotPreview(null);
+    setYamlPreview("");
+    setErrors([]);
+  }, [initialEvent]);
+  
   function addParameter() {
     setParameters([
       ...parameters,
@@ -120,7 +179,7 @@ function EventForm() {
         "At least one platform must be selected."
       );
     }
-    if (!screenshot) {
+    if (!screenshot && !existingScreenshotPath) {
       validationErrors.push(
         "Screenshot is required."
       );
@@ -152,37 +211,144 @@ function EventForm() {
 
     const event: TrackingEvent = {
       event_name: eventName.trim(),
-
       description: description.trim(),
-
       trigger: trigger.trim(),
-
       criticality,
-
-      status: "draft",
-
-      documentation_status: "complete",
-
+      status: initialEvent?.status ?? "draft",
+      documentation_status:
+        initialEvent?.documentation_status ?? "complete",
       platforms,
-
       parameters,
-
       screenshot: {
-        path: `assets/events/${eventName.trim()}/screenshot.png`,
-        alt: `${eventName.trim()} screen`,
+        path:
+          existingScreenshotPath ??
+          `assets/events/${eventName.trim()}/screenshot.${
+            screenshot?.type === "image/jpeg"
+              ? "jpg"
+              : screenshot?.type === "image/webp"
+                ? "webp"
+                : "png"
+          }`,
+        alt:
+          initialEvent?.screenshot?.alt ??
+          `${eventName.trim()} screen`,
       },
     };
 
     setYamlPreview(eventToYaml(event));
   }
+  async function fileToBase64(
+    file: File
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
 
+      reader.onload = () => {
+        const result = reader.result;
+
+        if (typeof result !== "string") {
+          reject(
+            new Error("Failed to read screenshot.")
+          );
+          return;
+        }
+
+        const base64 = result.split(",")[1];
+
+        if (!base64) {
+          reject(
+            new Error("Failed to encode screenshot.")
+          );
+          return;
+        }
+
+        resolve(base64);
+      };
+
+      reader.onerror = () => {
+        reject(
+          new Error("Failed to read screenshot.")
+        );
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+  async function submitForReview() {
+    if (!yamlPreview) {
+      return;
+    }
+
+    if (!screenshot && !existingScreenshotPath) {
+      alert("Screenshot is required.");
+      return;
+    }
+
+    try {
+      let screenshotBase64: string | undefined;
+      let screenshotPath: string | undefined;
+
+      if (screenshot) {
+        screenshotBase64 = await fileToBase64(screenshot);
+
+        const extension =
+          screenshot.type === "image/jpeg"
+            ? "jpg"
+            : screenshot.type === "image/webp"
+              ? "webp"
+              : "png";
+
+        screenshotPath =
+          `assets/events/${eventName.trim()}/screenshot.${extension}`;
+      } else {
+        screenshotPath = existingScreenshotPath ?? undefined;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/events`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            event_name: eventName.trim(),
+            yaml_content: yamlPreview,
+            screenshot_base64: screenshotBase64,
+            screenshot_path: screenshotPath,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            "Failed to submit event."
+        );
+      }
+
+      alert(
+        `Pull Request created:\n${result.pull_request_url}`
+      );
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Unknown error"
+      );
+    }
+  }
   return (
     <section
       style={{
         maxWidth: "800px",
       }}
     >
-      <h1>Create Event</h1>
+      <h1>
+        {initialEvent ? "Edit Event" : "Create Event"}
+      </h1>
 
       <div style={{ marginBottom: "20px" }}>
         <label>
@@ -469,7 +635,31 @@ function EventForm() {
       </div>
       <div style={{ marginBottom: "30px" }}>
         <h2>Screenshot</h2>
+        {existingScreenshotPath && !screenshotPreview && (
+          <div style={{ marginBottom: "12px" }}>
+            <p>
+              <strong>Current screenshot:</strong>
+            </p>
 
+            <img
+              src={`https://raw.githubusercontent.com/kostiantyn-yakymyshyn/mobile-analytics-tracking-hub/main/${existingScreenshotPath}`}
+              alt="Current event screenshot"
+              onError={(e) => {
+                console.error("SCREENSHOT LOAD ERROR:", e.currentTarget.src);
+              }}
+              onLoad={(e) => {
+                console.log("SCREENSHOT LOADED:", e.currentTarget.src);
+              }}
+              style={{
+                maxWidth: "400px",
+                maxHeight: "400px",
+                border: "1px solid #ddd",
+                borderRadius: "8px",
+                display: "block",
+              }}
+            />
+          </div>
+        )}
         <input
           type="file"
           accept="image/*"
@@ -501,17 +691,45 @@ function EventForm() {
           </div>
         )}
       </div>
-      <button
-        type="button"
-        onClick={generateYaml}
-        style={{
-          padding: "12px 20px",
-          cursor: "pointer",
-        }}
-      >
-        Preview YAML
-      </button>
-      
+      <div style={{ display: "flex", gap: "10px" }}>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{
+              padding: "12px 20px",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={generateYaml}
+          style={{
+            padding: "12px 20px",
+            cursor: "pointer",
+          }}
+        >
+          Preview YAML
+        </button>
+
+        <button
+          type="button"
+          onClick={submitForReview}
+          disabled={!yamlPreview}
+          style={{
+            padding: "12px 20px",
+            cursor: yamlPreview
+              ? "pointer"
+              : "not-allowed",
+          }}
+        >
+          Submit for review
+        </button>
+      </div>
       {errors.length > 0 && (
         <div
           style={{

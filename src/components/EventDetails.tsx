@@ -2,172 +2,121 @@ import type { TrackingEvent } from "../types/event";
 
 interface EventDetailsProps {
   event: TrackingEvent;
+  onEdit: (event: TrackingEvent) => void;
 }
 
-function EventDetails({ event }: EventDetailsProps) {
+function EventDetails({ event, onEdit }: EventDetailsProps) {
   return (
-    <section
-      style={{
-        flex: 1,
-        paddingLeft: "24px",
-      }}
-    >
-      <h1>{event.event_name}</h1>
+    <section className="event-details panel">
+      <div className="details-header">
+        <div>
+          <div className="details-eyebrow">TRACKING EVENT</div>
 
-      <div style={{ marginBottom: "24px" }}>
-        <p>
-          <strong>Description:</strong>
-        </p>
+          <h1>{event.event_name}</h1>
 
-        <p>{event.description}</p>
+          <div className="details-badges">
+            <span className={`badge criticality-${event.criticality}`}>
+              {event.criticality}
+            </span>
+
+            <span className={`badge status-${event.status}`}>
+              {event.status}
+            </span>
+          </div>
+        </div>
+
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={() => onEdit(event)}
+        >
+          Edit
+        </button>
       </div>
 
-      <div style={{ marginBottom: "24px" }}>
-        <p>
-          <strong>Trigger:</strong>
-        </p>
+      <div className="details-grid">
+        <div className="detail-card">
+          <span className="detail-label">DESCRIPTION</span>
+          <p>{event.description}</p>
+        </div>
 
-        <p>{event.trigger}</p>
+        <div className="detail-card">
+          <span className="detail-label">TRIGGER</span>
+          <p>{event.trigger}</p>
+        </div>
       </div>
 
-      <div style={{ marginBottom: "24px" }}>
-        <p>
-          <strong>Criticality:</strong>{" "}
-          {event.criticality}
-        </p>
-
-        <p>
-          <strong>Status:</strong> {event.status}
-        </p>
-      </div>
-
-      <div style={{ marginBottom: "24px" }}>
+      <div className="detail-section">
         <h2>Platforms</h2>
 
-        <p>
-          iOS: {event.platforms.ios ? "✅" : "❌"}
-        </p>
+        <div className="platform-list">
+          <span className={`platform ${event.platforms.ios ? "enabled" : ""}`}>
+            {event.platforms.ios ? "✓" : "×"} iOS
+          </span>
 
-        <p>
-          Android:{" "}
-          {event.platforms.android ? "✅" : "❌"}
-        </p>
+          <span
+            className={`platform ${
+              event.platforms.android ? "enabled" : ""
+            }`}
+          >
+            {event.platforms.android ? "✓" : "×"} Android
+          </span>
+        </div>
       </div>
 
-      <div>
-        <h2>Parameters</h2>
+      <div className="detail-section">
+        <div className="section-heading">
+          <h2>Parameters</h2>
+          <span>{event.parameters.length}</span>
+        </div>
 
         {event.parameters.length === 0 ? (
-          <p>No parameters.</p>
+          <div className="empty-box">No parameters.</div>
         ) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-            }}
-          >
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    textAlign: "left",
-                    borderBottom: "1px solid #ddd",
-                    padding: "8px",
-                  }}
-                >
-                  Name
-                </th>
-
-                <th
-                  style={{
-                    textAlign: "left",
-                    borderBottom: "1px solid #ddd",
-                    padding: "8px",
-                  }}
-                >
-                  Type
-                </th>
-
-                <th
-                  style={{
-                    textAlign: "left",
-                    borderBottom: "1px solid #ddd",
-                    padding: "8px",
-                  }}
-                >
-                  Required
-                </th>
-
-                <th
-                  style={{
-                    textAlign: "left",
-                    borderBottom: "1px solid #ddd",
-                    padding: "8px",
-                  }}
-                >
-                  Description
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {event.parameters.map((parameter) => (
-                <tr key={parameter.name}>
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid #eee",
-                    }}
-                  >
-                    <code>{parameter.name}</code>
-                  </td>
-
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid #eee",
-                    }}
-                  >
-                    {parameter.type}
-                  </td>
-
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid #eee",
-                    }}
-                  >
-                    {parameter.required ? "Yes" : "No"}
-                  </td>
-
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid #eee",
-                    }}
-                  >
-                    {parameter.description || "—"}
-                  </td>
+          <div className="table-wrapper">
+            <table className="parameters-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {event.parameters.map((parameter) => (
+                  <tr key={parameter.name}>
+                    <td>
+                      <code>{parameter.name}</code>
+                    </td>
+                    <td>{parameter.type}</td>
+                    <td>
+                      {parameter.required ? (
+                        <span className="required">Required</span>
+                      ) : (
+                        "Optional"
+                      )}
+                    </td>
+                    <td>{parameter.description || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {event.screenshot && (
-        <div style={{ marginTop: "32px" }}>
+        <div className="detail-section">
           <h2>Screenshot</h2>
 
-          <img
-            src={`/${event.screenshot.path}`}
-            alt={event.screenshot.alt}
-            style={{
-              maxWidth: "400px",
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-            }}
-          />
+          <div className="screenshot-card">
+            <img
+              src={`https://raw.githubusercontent.com/kostiantyn-yakymyshyn/mobile-analytics-tracking-hub/main/${event.screenshot.path}`}
+              alt={event.screenshot.alt}
+            />
+          </div>
         </div>
       )}
     </section>

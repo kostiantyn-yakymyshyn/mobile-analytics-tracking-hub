@@ -1,37 +1,65 @@
+import "./App.css";
 import { useEffect, useState } from "react";
 import { load } from "js-yaml";
 import type { TrackingEvent } from "./types/event";
-import { eventFiles } from "./data/events-index";
 import EventList from "./components/EventList";
 import EventDetails from "./components/EventDetails";
 import EventForm from "./components/EventForm";
+
+const API_URL =
+  "https://tracking-hub-api.tracking-hub-api.workers.dev";
 
 function App() {
   const [events, setEvents] = useState<TrackingEvent[]>([]);
   const [selectedEvent, setSelectedEvent] =
     useState<TrackingEvent | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [error, setError] = useState<string | null>(
-    null
-  );
+  const [editingEvent, setEditingEvent] =
+    useState<TrackingEvent | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadEvents() {
       try {
-        const loadedEvents = await Promise.all(
-          eventFiles.map(async (file) => {
-            const response = await fetch(file);
+        const url = `${API_URL}/events`;
 
-            if (!response.ok) {
-              throw new Error(
-                `Failed to load ${file}: ${response.status}`
-              );
-            }
+        console.log("Loading events from:", url);
 
-            const text = await response.text();
+        const response = await fetch(url);
 
-            return load(text) as TrackingEvent;
-          })
+        const contentType =
+          response.headers.get("content-type");
+
+        console.log(
+          "Response:",
+          response.status,
+          contentType
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load events: ${response.status}`
+          );
+        }
+
+        if (!contentType?.includes("application/json")) {
+          const text = await response.text();
+
+          throw new Error(
+            `API returned non-JSON response: ${text.slice(
+              0,
+              100
+            )}`
+          );
+        }
+
+        const files = (await response.json()) as {
+          path: string;
+          content: string;
+        }[];
+
+        const loadedEvents = files.map(
+          (file) => load(file.content) as TrackingEvent
         );
 
         setEvents(loadedEvents);
@@ -40,6 +68,8 @@ function App() {
           setSelectedEvent(loadedEvents[0]);
         }
       } catch (err) {
+        console.error("Failed to load events:", err);
+
         setError(
           err instanceof Error
             ? err.message
@@ -74,52 +104,67 @@ function App() {
   }
 
   return (
-    <main
-      style={{
-        padding: "40px",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <header style={{ marginBottom: "32px" }}>
-        <h1>Mobile Analytics Tracking Hub</h1>
+    <div className="app">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <div className="brand">
+            <div className="brand-icon">A</div>
 
-        <p style={{ color: "#666" }}>
-          Event tracking specification
-        </p>
+            <div>
+              <h1 className="brand-title">
+                Mobile Analytics Tracking Hub
+              </h1>
 
-        <button
-          onClick={() => setShowForm(!showForm)}
-          style={{
-            padding: "10px 16px",
-            cursor: "pointer",
-            marginTop: "10px",
-          }}
-        >
-          {showForm ? "Back to Catalog" : "+ Create Event"}
-        </button>
+              <p className="brand-subtitle">
+                Event tracking specification
+              </p>
+            </div>
+          </div>
+
+          <button
+            className="primary-button"
+            onClick={() => {
+              setEditingEvent(null);
+              setShowForm(!showForm);
+            }}
+          >
+            {showForm ? "← Back to Catalog" : "+ Create Event"}
+          </button>
+        </div>
       </header>
 
       {showForm ? (
-        <EventForm />
-      ) : (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-          }}
-        >
-          <EventList
-            events={events}
-            selectedEvent={selectedEvent}
-            onSelect={setSelectedEvent}
+        <main className="page">
+          <EventForm
+            initialEvent={editingEvent ?? undefined}
+            onCancel={() => {
+              setEditingEvent(null);
+              setShowForm(false);
+            }}
           />
+        </main>
+      ) : (
+        <main className="page">
+          <div className="catalog-layout">
+            <EventList
+              events={events}
+              selectedEvent={selectedEvent}
+              onSelect={setSelectedEvent}
+            />
 
-          {selectedEvent && (
-            <EventDetails event={selectedEvent} />
-          )}
-        </div>
+            {selectedEvent && (
+              <EventDetails
+                event={selectedEvent}
+                onEdit={(event) => {
+                  setEditingEvent(event);
+                  setShowForm(true);
+                }}
+              />
+            )}
+          </div>
+        </main>
       )}
-    </main>
+    </div>
   );
 }
 
