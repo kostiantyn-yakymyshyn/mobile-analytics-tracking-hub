@@ -1,8 +1,8 @@
 event_name: cc_details_send_tap
-description: User taps the "Send" button on the card details screen.+5
+description: User taps the "Send" button on the card details screen.
 trigger: User taps the "Send" button.
 criticality: medium
-status: draft
+status: active
 documentation_status: complete
 platforms:
   ios: true
@@ -24,4 +24,4 @@ parameters:
       - external
 screenshot:
   path: assets/events/cc_details_send_tap/screenshot.png
-  alt: cc_details_send_tap screen
+  alt: Card details screen with the Send button.
