@@ -1,19 +1,12 @@
 event_name: cc_details_send_tap
-
-description: User taps the "Send" button on the card details screen.
-
+description: User taps the "Send" button on the card details screen.+5
 trigger: User taps the "Send" button.
-
 criticality: medium
-
-status: active
-
+status: draft
 documentation_status: complete
-
 platforms:
   ios: true
   android: true
-
 parameters:
   - name: recipient_type
     type: enum
@@ -22,7 +15,6 @@ parameters:
     allowed_values:
       - own_account
       - another_customer
-
   - name: transfer_type
     type: enum
     required: true
@@ -30,7 +22,6 @@ parameters:
     allowed_values:
       - internal
       - external
-
 screenshot:
   path: assets/events/cc_details_send_tap/screenshot.png
-  alt: Card details screen with the Send button.
+  alt: cc_details_send_tap screen
