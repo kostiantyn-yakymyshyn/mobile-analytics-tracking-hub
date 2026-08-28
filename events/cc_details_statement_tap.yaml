@@ -1,5 +1,5 @@
 event_name: cc_details_statement_tap
-description: фівфвіф
+description: statement tap
 trigger: sadasdasd
 criticality: medium
 status: draft
