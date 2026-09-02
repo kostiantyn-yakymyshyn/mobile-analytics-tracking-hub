@@ -1,5 +1,5 @@
 event_name: cc_details_send_tap
-description: User taps the "Send" button on the card details screen.
+description: User taps the "Send" button on the card details screen.!!!!!!!!
 trigger: User taps the "Send" button.
 criticality: medium
 status: active
