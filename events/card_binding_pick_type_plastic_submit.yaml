@@ -1,17 +1,13 @@
 event_name: card_binding_pick_type_plastic_submit
-description: фівфівфів
-trigger: asdasd asd asd as evesea
-criticality: medium
+description: тут має бути опис події
+trigger: trigger
+criticality: high
 status: draft
 documentation_status: complete
 platforms:
   ios: true
   android: true
-parameters:
-  - name: type
-    type: string
-    required: true
-    description: ''
+parameters: []
 screenshot:
   path: assets/events/card_binding_pick_type_plastic_submit/screenshot.png
   alt: card_binding_pick_type_plastic_submit screen
